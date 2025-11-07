@@ -1,14 +1,11 @@
-from flask import Flask
-from threading import Thread
-
+import os
+from flask import Flask, jsonify
 app = Flask(__name__)
-
 @app.get("/")
 def index():
-    return "Nuvix Tickets OK", 200
-
+    return jsonify(ok=True, name="Nuvix Tickets", ts="2025-11-07 20:29:59 UTC")
 def run():
-    app.run(host="0.0.0.0", port=10000)
-
-def keep_alive():
-    Thread(target=run, daemon=True).start()
+    port = int(os.environ.get("PORT", "10000"))
+    app.run(host="0.0.0.0", port=port)
+if __name__ == "__main__":
+    run()

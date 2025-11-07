@@ -533,3 +533,18 @@ async def setup_cmd(interaction: discord.Interaction,
 
 # ============ RUN ============
 bot.run(TOKEN)
+
+# --- Keep Alive HTTP server (for Render Web Service) ---
+from threading import Thread
+from flask import Flask
+
+app = Flask('keep_alive')
+
+@app.route('/')
+def home():
+    return "Nuvix Tickets is running!"
+
+def run_web():
+    app.run(host='0.0.0.0', port=8080)
+
+Thread(target=run_web).start()

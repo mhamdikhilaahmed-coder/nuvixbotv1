@@ -104,6 +104,16 @@ REPLACE_CATEGORY_ID       = int(os.getenv("REPLACE_CATEGORY_ID", "0") or 0)
 SUPPORT_CATEGORY_ID       = int(os.getenv("SUPPORT_CATEGORY_ID", "0") or 0)
 
 # ─────────────────────────────────────────────────────────────────────────────
+import discord
+from discord.ext import commands
+
+intents = discord.Intents.default()
+intents.messages = True
+intents.guilds = True
+intents.members = True
+intents.reactions = True
+intents.message_content = True
+
 class NuvixBot(commands.Bot):
     def __init__(self):
         super().__init__(

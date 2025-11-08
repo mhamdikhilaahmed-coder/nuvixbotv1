@@ -104,31 +104,31 @@ REPLACE_CATEGORY_ID       = int(os.getenv("REPLACE_CATEGORY_ID", "0") or 0)
 SUPPORT_CATEGORY_ID       = int(os.getenv("SUPPORT_CATEGORY_ID", "0") or 0)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Intents & Bot
 class NuvixBot(commands.Bot):
     def __init__(self):
-        intents = discord.Intents.default()
-        intents.members = True
-        intents.presences = True
-        intents.message_content = True
         super().__init__(
             command_prefix=commands.when_mentioned_or("!"),
             intents=intents,
         )
 
-    async def setup_hook(self) -> None:
-        # Sincroniza los slash commands automáticamente al iniciar
-        if GUILD_ID:
-            guild = discord.Object(id=GUILD_ID)
-            synced = await self.tree.sync(guild=guild)
-            print(f"[AUTO SYNC] {len(synced)} comandos sincronizados en guild {GUILD_ID}")
-        else:
-            synced = await self.tree.sync()
-            print(f"[AUTO SYNC] {len(synced)} comandos sincronizados globalmente")
-            
-        # Mantén persistentes las vistas (botones/panel)
-        self.add_view(TicketPanelView())
-        
+    async def setup_hook(self):
+        # Sincroniza slash commands automáticamente al iniciar
+        try:
+            if GUILD_ID and GUILD_ID != 0:
+                guild = discord.Object(id=GUILD_ID)
+                synced = await self.tree.sync(guild=guild)
+                print(f"[SYNC] {len(synced)} comandos sincronizados en guild {GUILD_ID}")
+            else:
+                synced = await self.tree.sync()
+                print(f"[SYNC] {len(synced)} comandos sincronizados globalmente")
+
+            # Mantener los botones activos
+            self.add_view(TicketPanelView())
+            self.add_view(TicketControlsView())
+
+        except Exception as e:
+            print(f"[SYNC ERROR] {e}")
+
 # -------------------- Helper Functions --------------------
 def now_utc_str() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")

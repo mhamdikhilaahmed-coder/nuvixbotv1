@@ -544,9 +544,15 @@ def owner_only():
         return interaction.user.id in {OWNER_ID, COOWNER_ID}
     return app_commands.check(predicate)
 
-# -------------------- Slash Commands --------------------
-@bot.tree.command(name="ping", description="Check bot latency")
-async def cmd_ping(interaction: discord.Interaction):
+# Crear el bot primero
+bot = NuvixBot()
+
+# ────────────────────────────────────────────────
+# Slash commands
+# ────────────────────────────────────────────────
+
+@bot.tree.command(name="ping", description="Check bot latency (Pong!)")
+async def ping(interaction: discord.Interaction):
     await interaction.response.send_message(f"Pong! `{round(bot.latency*1000)}ms`", ephemeral=True)
 
 @bot.tree.command(name="panel", description="Post the ticket panel")
@@ -775,5 +781,5 @@ if __name__ == "__main__":
         from threading import Thread
         Thread(target=run_flask, daemon=True).start()
 
-    bot = NuvixBot()
     bot.run(TOKEN)
+

@@ -61,12 +61,12 @@ TICKETS_LOGS_CHANNEL_ID     = int(os.getenv("TICKETS_LOGS_CHANNEL_ID", "0") or 0
 TRANSCRIPTS_CHANNEL_ID      = int(os.getenv("TRANSCRIPTS_CHANNEL_ID", "0") or 0)
 REVIEWS_CHANNEL_ID          = int(os.getenv("REVIEWS_CHANNEL_ID", "0") or 0)
 
-# Visuals
-BOT_NAME   = os.getenv("BOT_NAME", "Nuvix Tickets")
-ICON_URL   = os.getenv("ICON_URL", "")
+# --- Visuals ---
+BOT_NAME = os.getenv("BOT_NAME", "Nuvix Tickets")
+ICON_URL = os.getenv("ICON_URL", "")
 BANNER_URL = os.getenv("BANNER_URL", "")
-FOOTER_TEXT= os.getenv("FOOTER_TEXT", "Nuvix • Your wishes, more cheap!")
-THEME_COLOR= int(os.getenv("THEME_COLOR", str(0x5865F2)))  # Classic blue default
+FOOTER_TEXT = os.getenv("FOOTER_TEXT", "Nuvix • Your wishes, more cheap!")
+THEME_COLOR = int(os.getenv("THEME_COLOR", "0x5865F2"), 16)  # Classic blue default
 
 # Owners / Staff
 OWNER_ID   = int(os.getenv("OWNER_ID", "0") or 0)

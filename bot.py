@@ -1,3 +1,9 @@
+# ==============================
+# Nuvix Tickets - Render Version
+# ==============================
+
+from __future__ import annotations
+
 # --- Patch for missing audioop (Python 3.12/3.13) ---
 import sys, types
 if "audioop" not in sys.modules:
@@ -15,22 +21,15 @@ if "audioop" not in sys.modules:
         tomono=lambda *a, **kw: b"",
     )
 
-# Nuvix Tickets — bot.py
-# Discord.py 2.4.x
-# ─────────────────────────────────────────────────────────────────────────────
-
-from __future__ import annotations
+# --- Imports ---
 import os
 import io
-import json
-import textwrap
-import traceback
 import datetime as dt
-from typing import Optional, List, Dict
-
 import discord
 from discord import app_commands
 from discord.ext import commands
+from keepalive import run as run_flask
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Optional keep-alive (Render Web Service)

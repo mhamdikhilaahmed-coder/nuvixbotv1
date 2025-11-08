@@ -100,13 +100,17 @@ NOT_RECEIVED_CATEGORY_ID  = int(os.getenv("NOT_RECEIVED_CATEGORY_ID", "0") or 0)
 REPLACE_CATEGORY_ID       = int(os.getenv("REPLACE_CATEGORY_ID", "0") or 0)
 SUPPORT_CATEGORY_ID       = int(os.getenv("SUPPORT_CATEGORY_ID", "0") or 0)
 
-# -------------------- Discord Bot --------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# Intents & Bot
 intents = discord.Intents.default()
-intents.guilds = True
-intents.members = True  # for role checks
+intents.members = True
+intents.presences = True
+intents.message_content = True  # <── ESTA LÍNEA ES CLAVE
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
-# bot.tree is created by discord.py automatically — do NOT override.
+bot = commands.Bot(
+    command_prefix=commands.when_mentioned_or("!"),
+    intents=intents,
+)
 
 # -------------------- Helper Functions --------------------
 def now_utc_str() -> str:
@@ -726,11 +730,29 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError):
     tb = "".join(traceback.format_exception(type(error), error, error.__traceback__))
     print(tb)
 
-# -------------------- Main --------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# FORCE SYNC DE COMANDOS
+# ─────────────────────────────────────────────────────────────────────────────
+import asyncio
+
+async def force_sync():
+    await bot.wait_until_ready()
+    if GUILD_ID:
+        guild = discord.Object(id=GUILD_ID)
+        synced = await bot.tree.sync(guild=guild)
+        print(f"[FORCE SYNC] {len(synced)} comandos sincronizados en guild {GUILD_ID}")
+    else:
+        synced = await bot.tree.sync()
+        print(f"[FORCE SYNC] {len(synced)} comandos sincronizados globalmente")
+
+bot.loop.create_task(force_sync())
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MAIN + KEEPALIVE
+# ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    if KEEPALIVE and _app is not None:
+    if KEEPALIVE and app is not None:
         # Bind HTTP server so Render detects the open PORT
-        # Discord client runs in the main thread; Flask runs in a background thread.
         import threading
         threading.Thread(target=run_keepalive, daemon=True).start()
 

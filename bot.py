@@ -125,16 +125,10 @@ class NuvixBot(commands.Bot):
         else:
             synced = await self.tree.sync()
             print(f"[AUTO SYNC] {len(synced)} comandos sincronizados globalmente")
-
+            
         # Mantén persistentes las vistas (botones/panel)
         self.add_view(TicketPanelView())
-
-        # Estado dinámico: muestra cuántos tickets hay abiertos
-        await self.change_presence(activity=discord.Activity(
-            type=discord.ActivityType.watching,
-            name=f"{len([c for c in self.get_all_channels() if 'ticket' in c.name])} tickets abiertos"
-        ))
-
+        
 # -------------------- Helper Functions --------------------
 def now_utc_str() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -731,24 +725,27 @@ async def cmd_sync(interaction: discord.Interaction):
 # -------------------- Events --------------------
 @bot.event
 async def on_ready():
-    # Persist button handlers across restarts
-    bot.add_view(TicketPanelView())
-    bot.add_view(TicketControlsView())
+    print(f"[READY] Logged in as {bot.user}")
 
-    # Auto-sync on startup (guild if provided, else global)
-    try:
-        if GUILD_ID:
-            guild = discord.Object(id=GUILD_ID)
-            synced = await bot.tree.sync(guild=guild)
-            print(f"[SYNC] Registered {len(synced)} commands for guild {GUILD_ID}")
-        else:
-            synced = await bot.tree.sync()
-            print(f"[SYNC] Registered {len(synced)} global commands")
-    except Exception as e:
-        print("[SYNC ERROR]", e)
+    # ✅ Actualiza la presencia dinámica (Watching X tickets abiertos)
+    open_tickets = len([
+        c for c in bot.get_all_channels()
+        if isinstance(c, discord.TextChannel)
+        and any(c.name.startswith(p) for p in ("purch-", "nrcv-", "repl-", "supp-"))
+    ])
 
-    print(f"[READY] Logged in as {bot.user} | {now_utc_str()}")
-    await log_to(PRIVATE_BOT_LOGS_CHANNEL_ID, embed=make_embed(f"{BOT_NAME} online", f"— {now_utc_str()}"))
+    await bot.change_presence(
+        activity=discord.Activity(
+            type=discord.ActivityType.watching,
+            name=f"{open_tickets} tickets abiertos"
+        )
+    )
+
+    await log_channel(
+        bot,
+        PRIVATE_BOT_LOGS_CHANNEL_ID,
+        make_embed(f"{BOT_NAME} online", f"— {now_utc_str()}")
+    )
 
 @bot.event
 async def on_app_command_completion(interaction: discord.Interaction, command: app_commands.Command):

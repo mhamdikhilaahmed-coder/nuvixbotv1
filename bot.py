@@ -42,22 +42,25 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-# -------------------- Keepalive (Render Web) --------------------
-# Enable by setting KEEPALIVE=1 (Render expects a port to be bound).
+# ─────────────────────────────────────────────────────────────────────────────
+# KEEPALIVE (para Render / Web Service)
+# ─────────────────────────────────────────────────────────────────────────────
+import os
+from flask import Flask
+from threading import Thread
+
 KEEPALIVE = os.getenv("KEEPALIVE", "0") == "1"
-_app = None
+
 if KEEPALIVE:
-    from flask import Flask, jsonify
-    _app = Flask(__name__)
+    app = Flask(__name__)
 
-    @_app.get("/")
-    def _root():
-        return jsonify(ok=True, service="nuvix-tickets")
+    @app.route("/")
+    def home():
+        return {"ok": True, "service": "nuvix-tickets"}
 
-    def run_keepalive():
+    def run_flask():
         port = int(os.getenv("PORT", "10000"))
-        # host 0.0.0.0 mandatory in Render
-        _app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
+        app.run(host="0.0.0.0", port=port, debug=False)
 
 # -------------------- Environment --------------------
 TOKEN = os.getenv("NUVIX_TICKETS_TOKEN") or os.getenv("TOKEN")
@@ -771,13 +774,11 @@ async def force_sync():
         synced = await bot.tree.sync()
         print(f"[FORCE SYNC] {len(synced)} comandos sincronizados globalmente")
 
-
 # ─────────────────────────────────────────────────────────────────────────────
-# MAIN + KEEPALIVE
+# MAIN
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     if KEEPALIVE:
-        from threading import Thread
         Thread(target=run_flask, daemon=True).start()
 
     bot = NuvixBot()

@@ -771,7 +771,6 @@ async def force_sync():
         synced = await bot.tree.sync()
         print(f"[FORCE SYNC] {len(synced)} comandos sincronizados globalmente")
 
-bot.loop.create_task(force_sync())
 
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN + KEEPALIVE
@@ -781,5 +780,5 @@ if __name__ == "__main__":
         from threading import Thread
         Thread(target=run_flask, daemon=True).start()
 
+    bot = NuvixBot()
     bot.run(TOKEN)
-

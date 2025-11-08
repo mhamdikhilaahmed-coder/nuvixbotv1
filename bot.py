@@ -102,15 +102,35 @@ SUPPORT_CATEGORY_ID       = int(os.getenv("SUPPORT_CATEGORY_ID", "0") or 0)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Intents & Bot
-intents = discord.Intents.default()
-intents.members = True
-intents.presences = True
-intents.message_content = True  # <── ESTA LÍNEA ES CLAVE
+class NuvixBot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        intents.members = True
+        intents.presences = True
+        intents.message_content = True
+        super().__init__(
+            command_prefix=commands.when_mentioned_or("!"),
+            intents=intents,
+        )
 
-bot = commands.Bot(
-    command_prefix=commands.when_mentioned_or("!"),
-    intents=intents,
-)
+    async def setup_hook(self) -> None:
+        # Sincroniza los slash commands automáticamente al iniciar
+        if GUILD_ID:
+            guild = discord.Object(id=GUILD_ID)
+            synced = await self.tree.sync(guild=guild)
+            print(f"[AUTO SYNC] {len(synced)} comandos sincronizados en guild {GUILD_ID}")
+        else:
+            synced = await self.tree.sync()
+            print(f"[AUTO SYNC] {len(synced)} comandos sincronizados globalmente")
+
+        # Mantén persistentes las vistas (botones/panel)
+        self.add_view(TicketPanelView())
+
+        # Estado dinámico: muestra cuántos tickets hay abiertos
+        await self.change_presence(activity=discord.Activity(
+            type=discord.ActivityType.watching,
+            name=f"{len([c for c in self.get_all_channels() if 'ticket' in c.name])} tickets abiertos"
+        ))
 
 # -------------------- Helper Functions --------------------
 def now_utc_str() -> str:
@@ -751,9 +771,9 @@ bot.loop.create_task(force_sync())
 # MAIN + KEEPALIVE
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    if KEEPALIVE and app is not None:
-        # Bind HTTP server so Render detects the open PORT
-        import threading
-        threading.Thread(target=run_keepalive, daemon=True).start()
+    if KEEPALIVE:
+        from threading import Thread
+        Thread(target=run_flask, daemon=True).start()
 
+    bot = NuvixBot()
     bot.run(TOKEN)
